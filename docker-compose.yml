@@ -2,7 +2,7 @@ services:
   api:
     build: ./backend
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -11,16 +11,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "pnpm exec prisma generate && pnpm exec prisma migrate deploy && pnpm run dev"
+    command: sh -c "pnpm exec prisma generate && pnpm exec prisma migrate deploy && pnpm run db:seed && pnpm run dev"
 
   web:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        API_DOMAIN: http://localhost:3000
     ports:
-      - "3030:3030"
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/webpack.config.js:/app/webpack.config.js
+      - '3030:80'
     depends_on:
       - api
 
@@ -32,11 +31,11 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: nestdb
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d nestdb"]
+      test: ['CMD-SHELL', 'pg_isready -U user -d nestdb']
       interval: 5s
       timeout: 5s
       retries: 5

@@ -8,7 +8,6 @@ ARG API_DOMAIN=http://localhost:3000
 ENV API_DOMAIN=$API_DOMAIN
 
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 
 RUN yarn install --immutable
 
