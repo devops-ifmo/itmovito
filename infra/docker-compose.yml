@@ -1,0 +1,10 @@
+services:
+  ansible:
+    image: alpine/ansible
+    working_dir: /ansible
+    volumes:
+      - ./ansible:/ansible
+      - ~/.ssh/id_ed25519:/tmp/id_ed25519:ro
+    environment:
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+    command: ansible-playbook -i inventory.ini install_docker.yml --private-key /tmp/id_ed25519

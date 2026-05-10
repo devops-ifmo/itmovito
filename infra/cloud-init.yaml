@@ -1,0 +1,14 @@
+#cloud-config
+package_update: true
+
+packages:
+  - docker.io
+
+users:
+  - name: aleldm
+    groups: sudo
+    shell: /bin/bash
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDrz7X5urgeoO7tesDVsAGO9uiRmLDBufrETOpKcBanM idale@honorbook
+
