@@ -41,7 +41,8 @@ const ProductList = () => {
     );
   }
 
-  const goToCreate = () => void navigate(routerUrls.product.createPage.create());
+  const goToCreate = () =>
+    void navigate(routerUrls.product.createPage.create());
 
   return (
     <Container sx={{ py: 6 }}>
