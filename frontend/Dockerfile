@@ -4,7 +4,7 @@ RUN corepack enable
 
 WORKDIR /app
 
-ARG API_DOMAIN=http://localhost:3000
+ARG API_DOMAIN=/api
 ENV API_DOMAIN=$API_DOMAIN
 
 COPY package.json yarn.lock .yarnrc.yml ./

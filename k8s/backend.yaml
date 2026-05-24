@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: itmovito
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: registry.mwsapis.ru/itmovito/itmovito-registry/backend:latest
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              node -e 'const net = require("net"); const wait = () => { const socket = net.createConnection({ host: "db", port: 5432 }, () => { socket.end(); process.exit(0); }); socket.on("error", () => setTimeout(wait, 1000)); socket.setTimeout(1000, () => { socket.destroy(); setTimeout(wait, 1000); }); }; wait();'
+              pnpm exec prisma migrate deploy
+              pnpm run db:seed
+              pnpm run start
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: backend-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: itmovito
+spec:
+  selector:
+    app: backend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP

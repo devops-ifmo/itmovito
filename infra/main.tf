@@ -8,6 +8,28 @@ resource "mws_vpc_subnet" "subnet" {
   cidr    = var.subnet_cidr
 }
 
+resource "mws_vpc_egress_nat" "egress_nat" {
+  egress_nat = "${var.mk8s_cluster_name}-egress-nat"
+  network    = mws_vpc_network.network.network
+
+  metadata = {
+    description  = "Egress NAT for Managed Kubernetes nodes"
+    display_name = "${var.mk8s_cluster_name}-egress-nat"
+  }
+
+  external = {
+    addresses = [
+      {
+        spec = {}
+      }
+    ]
+  }
+
+  internal = {
+    subnets = [mws_vpc_subnet.subnet.metadata.id]
+  }
+}
+
 data "mws_compute_image" "image" {
   image   = "mws-ubuntu-2204-lts-v20250529"
   project = "mws-ubuntu"
@@ -128,6 +150,30 @@ resource "mws_vpc_firewall_rule" "firewall_rule" {
   active      = true
 }
 
+resource "mws_vpc_firewall_rule" "frontend_load_balancer" {
+  firewall_rule = "allow-frontend-load-balancer"
+  network       = mws_vpc_network.network.network
+
+  priority  = 1001
+  direction = "INGRESS"
+  action    = "ALLOW"
+
+  source = {
+    spec = {
+      cidrs = ["0.0.0.0/0"]
+    }
+  }
+
+  destination = {
+    spec = {
+      cidrs = [var.subnet_cidr]
+    }
+  }
+
+  proto_ports = ["TCP:30080"]
+  active      = true
+}
+
 resource "mws_mk8s_cluster" "cluster" {
   availability = {
     standalone = {
@@ -159,4 +205,51 @@ resource "mws_mk8s_cluster" "cluster" {
     release_channel = var.mk8s_release_channel
     version         = var.mk8s_version
   }
+}
+
+resource "mws_mk8s_node_group" "node_group" {
+  cluster_name    = mws_mk8s_cluster.cluster.cluster_name
+  node_group_name = var.mk8s_node_group_name
+
+  service_account = {
+    ref = "projects/${var.project}/serviceAccounts/${var.service_account}"
+  }
+
+  subnet = {
+    ref = mws_vpc_subnet.subnet.metadata.id
+  }
+
+  vm_type = {
+    ref = "compute/vmTypes/${var.mk8s_node_vm_type}"
+  }
+
+  scale = {
+    autoscaling = {
+      min = var.mk8s_node_min_count
+      max = var.mk8s_node_max_count
+    }
+  }
+
+  rollout_strategy = {
+    max_surge       = 1
+    max_unavailable = 0
+  }
+
+  version_control = {
+    auto_update = true
+    version     = var.mk8s_version
+
+    maintenance_window = {
+      weekly = {
+        days     = ["MONDAY"]
+        hour     = 1
+        duration = "4h"
+      }
+    }
+  }
+
+  image_storage_iops = 10000
+  image_storage_size = var.mk8s_node_image_storage_size
+  taints             = []
+  zone               = var.zone
 }

@@ -69,3 +69,28 @@ variable "mk8s_version" {
   type    = string
   default = "v1.34.1-mws.1"
 }
+
+variable "mk8s_node_group_name" {
+  type    = string
+  default = "itmovito-node-group"
+}
+
+variable "mk8s_node_vm_type" {
+  type    = string
+  default = "gen-2-4"
+}
+
+variable "mk8s_node_image_storage_size" {
+  type    = string
+  default = "15Gb"
+}
+
+variable "mk8s_node_min_count" {
+  type    = number
+  default = 1
+}
+
+variable "mk8s_node_max_count" {
+  type    = number
+  default = 2
+}

@@ -53,7 +53,7 @@ export default (_, argv) => {
       // Для получения доступа к переменным окружения и другим
       new webpack.DefinePlugin({
         'process.env.API_DOMAIN': JSON.stringify(
-          process.env.API_DOMAIN ?? 'http://localhost:3000',
+          process.env.API_DOMAIN ?? '/api',
         ),
       }),
       new HtmlWebpackPlugin({
