@@ -108,40 +108,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install MWS CLI
-        run: curl -sSL https://storage.mwsapis.ru/mws-cli/install.sh | bash
-
-      - name: Add MWS CLI to PATH
-        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      - name: Write MWS service account key to temp file
-        run: |
-          mkdir -p "$RUNNER_TEMP/mws"
-          cat > "$RUNNER_TEMP/mws/service-account-key.json" <<'EOF'
-          ${{ secrets.MWS_SERVICE_ACCOUNT_KEY }}
-          EOF
-          chmod 600 "$RUNNER_TEMP/mws/service-account-key.json"
-
-      - name: Init MWS profile using service account key
-        run: mws init --service-account-authorized-key "$RUNNER_TEMP/mws/service-account-key.json"
-
-      - name: Configure Docker credential helper for MWS Registry
-        run: mws registry configure-docker
+      - name: Login to MWS Registry
+        run: echo "${{ secrets.MWS_REGISTRY_API_KEY }}" | docker login -u apikey --password-stdin registry.mwsapis.ru
 
       - name: Build and push backend image
         run: |
           docker build \
-            -t registry.mwsapis.ru/itmovito/itmovito-registry/backend:${{ github.sha }} \
+            -t registry.mwsapis.ru/itmovito/itmovito-registry/backend:${{ github.run_number }} \
             -t registry.mwsapis.ru/itmovito/itmovito-registry/backend:latest \
             ./backend
-          docker push registry.mwsapis.ru/itmovito/itmovito-registry/backend:${{ github.sha }}
+          docker push registry.mwsapis.ru/itmovito/itmovito-registry/backend:${{ github.run_number }}
           docker push registry.mwsapis.ru/itmovito/itmovito-registry/backend:latest
 
       - name: Build and push frontend image
         run: |
           docker build \
-            -t registry.mwsapis.ru/itmovito/itmovito-registry/frontend:${{ github.sha }} \
+            -t registry.mwsapis.ru/itmovito/itmovito-registry/frontend:${{ github.run_number }} \
             -t registry.mwsapis.ru/itmovito/itmovito-registry/frontend:latest \
             ./frontend
-          docker push registry.mwsapis.ru/itmovito/itmovito-registry/frontend:${{ github.sha }}
+          docker push registry.mwsapis.ru/itmovito/itmovito-registry/frontend:${{ github.run_number }}
           docker push registry.mwsapis.ru/itmovito/itmovito-registry/frontend:latest
