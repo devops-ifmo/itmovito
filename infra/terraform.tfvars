@@ -1,5 +1,5 @@
-sa_key_path = "./keys/service-account-key.txt"
-project     = "itmovito"
+sa_key_path  = "./keys/service-account-key.txt"
+project      = "itmovito"
 network_name = "mynetwork"
 subnet_name  = "mysubnet"
 subnet_cidr  = "192.168.0.0/16"

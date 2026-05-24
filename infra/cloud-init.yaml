@@ -3,17 +3,12 @@
 package_update: true
 
 users:
-  - name: aleldm
+  - name: itmo
     groups: sudo
     shell: /bin/bash
     sudo: 'ALL=(ALL) NOPASSWD:ALL'
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDrz7X5urgeoO7tesDVsAGO9uiRmLDBufrETOpKcBanM idale@honorbook
-  - name: phil
-    groups: sudo
-    shell: /bin/bash
-    sudo: 'ALL=(ALL) NOPASSWD:ALL'
-    ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEP3myEBhhiyvUhAhIiBbq1eqkxgj2ihnZWeNGgXJk9A filfju@gmail.com
 
 runcmd:
@@ -40,6 +35,3 @@ runcmd:
 
   - systemctl enable docker
   - systemctl start docker
-
-  - docker --version
-  - docker compose version
