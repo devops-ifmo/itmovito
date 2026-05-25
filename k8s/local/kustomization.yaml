@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: itmovito
+
+resources:
+  - ../namespace.yaml
+  - ../postgres.yaml
+  - ../backend-env.yaml
+  - ../backend.yaml
+  - ../frontend.yaml
+
+images:
+  - name: registry.mwsapis.ru/itmovito/itmovito-registry/backend
+    newName: itmovito/backend
+    newTag: local
+  - name: registry.mwsapis.ru/itmovito/itmovito-registry/frontend
+    newName: itmovito/frontend
+    newTag: local
+
+patches:
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never

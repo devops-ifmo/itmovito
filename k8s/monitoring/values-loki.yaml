@@ -1,0 +1,16 @@
+# Helm values for grafana/loki-stack.
+# Installs: Loki + Promtail (DaemonSet).
+# Grafana already comes from kube-prometheus-stack, so we disable it here.
+loki:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+
+promtail:
+  enabled: true
+
+grafana:
+  enabled: false
+prometheus:
+  enabled: false

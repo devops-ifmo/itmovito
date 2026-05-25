@@ -1,0 +1,32 @@
+# Helm values for kube-prometheus-stack.
+# Installs: Prometheus, Grafana, node-exporter, kube-state-metrics.
+fullnameOverride: kps
+
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    resources:
+      requests: { cpu: 100m, memory: 512Mi }
+      limits:   { memory: 1Gi }
+
+grafana:
+  adminUser: admin
+  adminPassword: itmovito
+  defaultDashboardsEnabled: true
+  service:
+    type: LoadBalancer
+    port: 80
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      searchNamespace: ALL
+
+alertmanager:
+  enabled: false
