@@ -10,12 +10,15 @@
     "lint:fix": "yarn lint:code --fix",
     "lint:code": "eslint .",
     "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "sonar": "sonar-scanner",
     "precommit": "yarn lint:fix",
     "prepare": "husky"
   },
   "devDependencies": {
     "@antebudimir/eslint-plugin-vanilla-extract": "^1.16.0",
     "@eslint/js": "^10.0.1",
+    "@sonar/scan": "^4.3.6",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@swc/core": "^1.15.30",
     "@testing-library/dom": "^10.4.1",
@@ -58,6 +61,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.0.0",
     "@tanstack/react-query": "^5.100.3",
+    "@vitest/coverage-v8": "^4.1.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "^7.14.2",
