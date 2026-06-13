@@ -1,5 +1,3 @@
-# Helm values for kube-prometheus-stack.
-# Installs: Prometheus, Grafana, node-exporter, kube-state-metrics.
 fullnameOverride: kps
 
 prometheus:

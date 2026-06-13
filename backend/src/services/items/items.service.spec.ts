@@ -39,6 +39,10 @@ describe('ItemsService', () => {
     service = moduleRef.get(ItemsService);
   });
 
+  it('is defined', () => {
+    expect(service).toBeDefined();
+  });
+
   describe('getItems', () => {
     it('returns all items from prisma', async () => {
       const items = [{ id: 1, name: 'a' }];
@@ -68,7 +72,7 @@ describe('ItemsService', () => {
   });
 
   describe('getItemsWithFilter', () => {
-    it('applies pagination and returns items + total', async () => {
+    it('applies pagination and returns items + total with no filters', async () => {
       prisma.$transaction.mockResolvedValue([[{ id: 1 }], 1]);
 
       const result = await service.getItemsWithFilter({
@@ -80,6 +84,126 @@ describe('ItemsService', () => {
 
       expect(result).toEqual({ items: [{ id: 1 }], total: 1 });
       expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+
+      // verify the query passed to findMany: pagination + ordering, empty where
+      const [findManyCall] = prisma.item.findMany.mock.calls[0];
+      expect(findManyCall).toEqual({
+        where: {},
+        orderBy: { createdAt: 'desc' },
+        skip: 10,
+        take: 10,
+      });
+      expect(prisma.item.count).toHaveBeenCalledWith({ where: {} });
+    });
+
+    it('builds a where clause with category filter', async () => {
+      prisma.$transaction.mockResolvedValue([[], 0]);
+
+      await service.getItemsWithFilter({
+        category: 'auto',
+        sortBy: 'price',
+        order: 'asc',
+        page: 1,
+        limit: 20,
+      } as any);
+
+      const [findManyCall] = prisma.item.findMany.mock.calls[0];
+      expect(findManyCall.where).toEqual({ category: 'auto' });
+      expect(findManyCall.orderBy).toEqual({ price: 'asc' });
+      expect(findManyCall.skip).toBe(0);
+    });
+
+    it('builds a case-insensitive OR search clause', async () => {
+      prisma.$transaction.mockResolvedValue([[], 0]);
+
+      await service.getItemsWithFilter({
+        search: 'bmw',
+        sortBy: 'createdAt',
+        order: 'desc',
+        page: 1,
+        limit: 20,
+      } as any);
+
+      const [findManyCall] = prisma.item.findMany.mock.calls[0];
+      expect(findManyCall.where).toEqual({
+        OR: [
+          { name: { contains: 'bmw', mode: 'insensitive' } },
+          { description: { contains: 'bmw', mode: 'insensitive' } },
+        ],
+      });
+    });
+
+    it('builds a price range with both min and max', async () => {
+      prisma.$transaction.mockResolvedValue([[], 0]);
+
+      await service.getItemsWithFilter({
+        minPrice: 100,
+        maxPrice: 500,
+        sortBy: 'price',
+        order: 'asc',
+        page: 1,
+        limit: 20,
+      } as any);
+
+      const [findManyCall] = prisma.item.findMany.mock.calls[0];
+      expect(findManyCall.where).toEqual({ price: { gte: 100, lte: 500 } });
+    });
+
+    it('builds a price range with only minPrice', async () => {
+      prisma.$transaction.mockResolvedValue([[], 0]);
+
+      await service.getItemsWithFilter({
+        minPrice: 100,
+        sortBy: 'price',
+        order: 'asc',
+        page: 1,
+        limit: 20,
+      } as any);
+
+      const [findManyCall] = prisma.item.findMany.mock.calls[0];
+      expect(findManyCall.where).toEqual({ price: { gte: 100 } });
+    });
+
+    it('builds a price range with only maxPrice', async () => {
+      prisma.$transaction.mockResolvedValue([[], 0]);
+
+      await service.getItemsWithFilter({
+        maxPrice: 500,
+        sortBy: 'price',
+        order: 'asc',
+        page: 1,
+        limit: 20,
+      } as any);
+
+      const [findManyCall] = prisma.item.findMany.mock.calls[0];
+      expect(findManyCall.where).toEqual({ price: { lte: 500 } });
+    });
+
+    it('combines search, category and price filters', async () => {
+      prisma.$transaction.mockResolvedValue([[{ id: 7 }], 1]);
+
+      await service.getItemsWithFilter({
+        search: 'flat',
+        category: 'real_estate',
+        minPrice: 1000,
+        maxPrice: 5000,
+        sortBy: 'price',
+        order: 'desc',
+        page: 3,
+        limit: 5,
+      } as any);
+
+      const [findManyCall] = prisma.item.findMany.mock.calls[0];
+      expect(findManyCall.where).toEqual({
+        category: 'real_estate',
+        OR: [
+          { name: { contains: 'flat', mode: 'insensitive' } },
+          { description: { contains: 'flat', mode: 'insensitive' } },
+        ],
+        price: { gte: 1000, lte: 5000 },
+      });
+      expect(findManyCall.skip).toBe(10);
+      expect(findManyCall.take).toBe(5);
     });
   });
 

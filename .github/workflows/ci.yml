@@ -29,8 +29,20 @@ jobs:
       - run: pnpm run lint
         working-directory: ./backend
 
-      - run: pnpm test
+      - run: pnpm run test:cov
         working-directory: ./backend
+
+      - name: Publish coverage summary
+        if: always()
+        working-directory: ./backend
+        run: |
+          {
+            echo "## Backend test coverage"
+            echo ""
+            echo '```'
+            node -e "const s=require('./coverage/coverage-summary.json').total; for (const k of ['statements','branches','functions','lines']) { console.log(k.padEnd(12), s[k].pct + '%'); }"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   backend-build:
     name: Backend build
