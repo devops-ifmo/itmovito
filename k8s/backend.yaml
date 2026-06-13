@@ -24,8 +24,8 @@ spec:
               set -e
               node -e 'const net = require("net"); const wait = () => { const socket = net.createConnection({ host: "db", port: 5432 }, () => { socket.end(); process.exit(0); }); socket.on("error", () => setTimeout(wait, 1000)); socket.setTimeout(1000, () => { socket.destroy(); setTimeout(wait, 1000); }); }; wait();'
               pnpm exec prisma migrate deploy
-              pnpm run db:seed
-              pnpm run start
+              node dist/seed.js
+              node dist/main
           ports:
             - name: http
               containerPort: 3000
