@@ -96,7 +96,7 @@ jobs:
       - run: yarn lint
         working-directory: ./frontend
 
-      - run: yarn test:cov
+      - run: yarn test:coverage
         working-directory: ./frontend
 
       - name: SonarQube Scan
