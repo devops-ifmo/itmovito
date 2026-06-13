@@ -24,7 +24,7 @@ const createJsonResponse = (
 
   response.clone.mockReturnValue(response);
 
-  return response as Response;
+  return response as unknown as Response;
 };
 
 describe('ApiError', () => {
