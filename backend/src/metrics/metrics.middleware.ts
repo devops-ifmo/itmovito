@@ -12,10 +12,10 @@ export class MetricsMiddleware implements NestMiddleware {
     const end = this.metrics.httpDuration.startTimer();
     res.on('finish', () => {
       const route = req.route?.path ?? req.path ?? 'unknown';
-      const labels = { 
+      const labels = {
         method: req.method,
         route,
-        status: String(res.statusCode)
+        status: String(res.statusCode),
       };
       end(labels);
       this.metrics.httpRequests.inc(labels);
