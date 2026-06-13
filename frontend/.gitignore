@@ -24,3 +24,5 @@ __generated-style-types__
 
 .scannerwork
 coverage
+
+.env

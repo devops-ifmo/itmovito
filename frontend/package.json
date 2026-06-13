@@ -11,7 +11,7 @@
     "lint:code": "eslint .",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "sonar": "sonar-scanner",
+    "sonar": "dotenv -- sonar-scanner",
     "precommit": "yarn lint:fix",
     "prepare": "husky"
   },
@@ -32,6 +32,7 @@
     "@vanilla-extract/css": "^1.20.1",
     "@vanilla-extract/webpack-plugin": "^2.3.27",
     "css-loader": "^7.1.4",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^10.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
