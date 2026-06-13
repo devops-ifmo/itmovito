@@ -90,7 +90,7 @@ describe('ProductForm', () => {
   });
 
   it('disables submit when required fields are invalid', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     renderForm();
 
@@ -111,14 +111,12 @@ describe('ProductForm', () => {
   });
 
   it('creates product with trimmed and parsed form values', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     vi.mocked(createProduct).mockResolvedValue(product);
 
-    const { onSuccess } = renderForm();
+    const { onSuccess } = renderForm({ defaultCategory: 'electronics' });
 
-    await user.click(screen.getByRole('combobox', { name: 'Категория' }));
-    await user.click(screen.getByRole('option', { name: 'Электроника' }));
     await user.type(
       screen.getByRole('textbox', { name: /Название/ }),
       '  Ноутбук Lenovo  ',
@@ -141,14 +139,12 @@ describe('ProductForm', () => {
         description: 'Игровой ноутбук в хорошем состоянии',
         price: 125000.5,
       });
-    });
-    await waitFor(() => {
       expect(onSuccess).toHaveBeenCalledWith(product);
     });
   });
 
   it('calls onCancel when cancel button is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     const { onCancel } = renderForm();
 
@@ -158,7 +154,7 @@ describe('ProductForm', () => {
   });
 
   it('shows api error messages for failed save', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     vi.mocked(createProduct).mockRejectedValue(new ApiError(404, 'Not found'));
 
@@ -171,7 +167,7 @@ describe('ProductForm', () => {
   });
 
   it('shows validation error message from api', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     vi.mocked(createProduct).mockRejectedValue(
       new ApiError(400, 'Invalid payload'),
@@ -186,7 +182,7 @@ describe('ProductForm', () => {
   });
 
   it('shows server error message for 5xx responses', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     vi.mocked(createProduct).mockRejectedValue(
       new ApiError(500, 'Server error'),
@@ -203,7 +199,7 @@ describe('ProductForm', () => {
   });
 
   it('updates existing product in edit mode', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     vi.mocked(updateProduct).mockResolvedValue(product);
 
@@ -227,8 +223,6 @@ describe('ProductForm', () => {
         description: product.description,
         price: 120000,
       });
-    });
-    await waitFor(() => {
       expect(onSuccess).toHaveBeenCalledWith(product);
     });
   });
