@@ -3,6 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { ApiError } from '@/api/client';
 import { createProduct, updateProduct } from '@/api/products';
 import { type Product } from '@/entities/product/product.schema';
 
@@ -144,6 +145,61 @@ describe('ProductForm', () => {
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalledWith(product);
     });
+  });
+
+  it('calls onCancel when cancel button is clicked', async () => {
+    const user = userEvent.setup();
+
+    const { onCancel } = renderForm();
+
+    await user.click(screen.getByRole('button', { name: 'Отмена' }));
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows api error messages for failed save', async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(createProduct).mockRejectedValue(new ApiError(404, 'Not found'));
+
+    renderForm();
+
+    await user.type(screen.getByRole('textbox', { name: /Название/ }), 'Phone');
+    await user.click(screen.getByRole('button', { name: 'Создать' }));
+
+    expect(await screen.findByText('Товар не найден.')).toBeInTheDocument();
+  });
+
+  it('shows validation error message from api', async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(createProduct).mockRejectedValue(
+      new ApiError(400, 'Invalid payload'),
+    );
+
+    renderForm();
+
+    await user.type(screen.getByRole('textbox', { name: /Название/ }), 'Phone');
+    await user.click(screen.getByRole('button', { name: 'Создать' }));
+
+    expect(await screen.findByText('Invalid payload')).toBeInTheDocument();
+  });
+
+  it('shows server error message for 5xx responses', async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(createProduct).mockRejectedValue(
+      new ApiError(500, 'Server error'),
+    );
+
+    renderForm();
+
+    await user.type(screen.getByRole('textbox', { name: /Название/ }), 'Phone');
+    await user.click(screen.getByRole('button', { name: 'Создать' }));
+
+    expect(
+      await screen.findByText('Ошибка сервера. Попробуйте позже.'),
+    ).toBeInTheDocument();
   });
 
   it('updates existing product in edit mode', async () => {
