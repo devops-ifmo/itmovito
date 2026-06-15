@@ -90,6 +90,30 @@ resource "mws_vpc_firewall_rule" "frontend_load_balancer" {
   active      = true
 }
 
+resource "mws_vpc_firewall_rule" "argocd_load_balancer" {
+  firewall_rule = "allow-argocd-load-balancer"
+  network       = mws_vpc_network.network.network
+
+  priority  = 1002
+  direction = "INGRESS"
+  action    = "ALLOW"
+
+  source = {
+    spec = {
+      cidrs = ["0.0.0.0/0"]
+    }
+  }
+
+  destination = {
+    spec = {
+      cidrs = [var.subnet_cidr]
+    }
+  }
+
+  proto_ports = ["TCP:30443"]
+  active      = true
+}
+
 resource "mws_mk8s_cluster" "cluster" {
   availability = {
     standalone = {

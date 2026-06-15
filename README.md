@@ -137,6 +137,42 @@ kubectl -n itmovito get svc frontend
 
 Backend при старте ждёт PostgreSQL, выполняет миграции Prisma и seed.
 
+### GitOps через ArgoCD
+
+ArgoCD автоматически деплоит приложение из Git (ветка `master`, папка `k8s/`).
+
+**1. Установка ArgoCD** (namespace создаётся автоматически):
+
+```bash
+kubectl apply -k k8s/argocd
+kubectl -n argocd rollout status deployment/argocd-server
+```
+
+**2. Доступ к UI.** `argocd-server` опубликован через `LoadBalancer` (`k8s/argocd/server-lb.yaml`), порт `30443` открыт в firewall (Terraform). Внешний IP:
+
+```bash
+kubectl -n argocd get svc argocd-server-lb
+```
+
+Открой `https://<EXTERNAL-IP>` (LB слушает `443`; через NodePort — `https://<IP-ноды>:30443`). Логин `admin`, пароль:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d; echo
+```
+
+**3. Подключить приложение.** Один раз применяешь Application — ArgoCD начнёт следить за `k8s/` в GitHub:
+
+```bash
+kubectl apply -f k8s/argocd/itmovito.yaml
+```
+
+После `git push` в `master` изменения в `k8s/` автоматически попадут в кластер (`prune` + `selfHeal` включены).
+
+В UI ArgoCD появится одно приложение — `itmovito` (namespace, postgres, backend, frontend из `k8s/kustomization.yaml`).
+
+> Файлы должны быть в GitHub — ArgoCD читает репозиторий, а не локальные файлы. Закоммить и запушь `k8s/kustomization.yaml` и `k8s/argocd/` перед первым запуском.
+
 ### Локальный запуск в Kubernetes
 
 Для minikube, kind или Docker Desktop:
