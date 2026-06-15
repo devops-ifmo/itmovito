@@ -1,5 +1,5 @@
 services:
-  api:
+  backend:
     image: registry.mwsapis.ru/itmovito/itmovito-registry/backend:1.0.1
     restart: always
     ports:
@@ -18,7 +18,7 @@ services:
     ports:
       - '80:80'
     depends_on:
-      - api
+      - backend
 
   db:
     image: postgres:15-alpine

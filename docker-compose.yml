@@ -1,5 +1,5 @@
 services:
-  api:
+  backend:
     build: ./backend
     ports:
       - "3000:3000"
@@ -18,7 +18,7 @@ services:
     ports:
       - "3030:80"
     depends_on:
-      - api
+      - backend
 
   db:
     image: postgres:15-alpine
