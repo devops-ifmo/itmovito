@@ -1,0 +1,57 @@
+name: Telegram notify
+description: Sends a CI job status message to Telegram via the Bot API.
+
+inputs:
+  bot-token:
+    description: Telegram bot token (from @BotFather).
+    required: true
+  chat-id:
+    description: Telegram chat id to send the message to.
+    required: true
+  status:
+    description: Job status — pass ${{ job.status }} (success | failure | cancelled).
+    required: true
+  job-name:
+    description: Human-readable name of the job/stage.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Send Telegram message
+      shell: bash
+      env:
+        BOT_TOKEN: ${{ inputs.bot-token }}
+        CHAT_ID: ${{ inputs.chat-id }}
+        STATUS: ${{ inputs.status }}
+        JOB_NAME: ${{ inputs.job-name }}
+        REPO: ${{ github.repository }}
+        REF: ${{ github.ref_name }}
+        SHA: ${{ github.sha }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -euo pipefail
+
+        if [ -z "${BOT_TOKEN}" ] || [ -z "${CHAT_ID}" ]; then
+          echo "::warning::TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not set — skipping notification."
+          exit 0
+        fi
+
+        case "${STATUS}" in
+          success)   ICON="✅" ;;
+          failure)   ICON="❌" ;;
+          cancelled) ICON="⚠️" ;;
+          *)         ICON="ℹ️" ;;
+        esac
+
+        SHORT_SHA="${SHA:0:7}"
+        TEXT="$(printf '%s <b>%s</b> — %s\n<code>%s</code> @ <code>%s</code> (%s)\n<a href="%s">View run</a>' \
+          "${ICON}" "${JOB_NAME}" "${STATUS}" "${REPO}" "${REF}" "${SHORT_SHA}" "${RUN_URL}")"
+
+        curl -sS --fail-with-body \
+          "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+          --data-urlencode "chat_id=${CHAT_ID}" \
+          --data-urlencode "text=${TEXT}" \
+          --data-urlencode "parse_mode=HTML" \
+          --data-urlencode "disable_web_page_preview=true" \
+          -o /dev/null

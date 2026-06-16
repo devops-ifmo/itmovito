@@ -44,6 +44,7 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+<<<<<<< Updated upstream
       - uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
@@ -71,6 +72,16 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: ./backend
+=======
+      - name: Notify Telegram
+        if: always()
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: ${{ job.status }}
+          job-name: Backend test
+>>>>>>> Stashed changes
 
   backend-build:
     name: Backend build
@@ -95,6 +106,15 @@ jobs:
       - run: pnpm run build
         working-directory: ./backend
 
+      - name: Notify Telegram
+        if: always()
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: ${{ job.status }}
+          job-name: Backend build
+
   frontend-test:
     name: Frontend test
     runs-on: ubuntu-latest
@@ -117,6 +137,7 @@ jobs:
       - run: yarn test:coverage
         working-directory: ./frontend
 
+<<<<<<< Updated upstream
       - uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
@@ -144,6 +165,16 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: ./frontend
+=======
+      - name: Notify Telegram
+        if: always()
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: ${{ job.status }}
+          job-name: Frontend test
+>>>>>>> Stashed changes
 
   frontend-build:
     name: Frontend build
@@ -164,6 +195,15 @@ jobs:
 
       - run: yarn build
         working-directory: ./frontend
+
+      - name: Notify Telegram
+        if: always()
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: ${{ job.status }}
+          job-name: Frontend build
 
   publish-images:
     name: Publish Docker images to MWS Registry
@@ -196,3 +236,12 @@ jobs:
             ./frontend
           docker push registry.mwsapis.ru/itmovito/itmovito-registry/frontend:${{ github.run_number }}
           docker push registry.mwsapis.ru/itmovito/itmovito-registry/frontend:latest
+
+      - name: Notify Telegram
+        if: always()
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: ${{ job.status }}
+          job-name: Publish images
