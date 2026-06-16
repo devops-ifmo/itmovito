@@ -44,11 +44,19 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-<<<<<<< Updated upstream
       - uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
           path: backend/coverage/
+
+      - name: Notify Telegram
+        if: always()
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: ${{ job.status }}
+          job-name: Backend test
 
   backend-sonar:
     name: Backend SonarQube
@@ -72,7 +80,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: ./backend
-=======
+
       - name: Notify Telegram
         if: always()
         uses: ./.github/actions/telegram-notify
@@ -80,8 +88,7 @@ jobs:
           bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           status: ${{ job.status }}
-          job-name: Backend test
->>>>>>> Stashed changes
+          job-name: Backend SonarQube
 
   backend-build:
     name: Backend build
@@ -137,11 +144,19 @@ jobs:
       - run: yarn test:coverage
         working-directory: ./frontend
 
-<<<<<<< Updated upstream
       - uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
           path: frontend/coverage/
+
+      - name: Notify Telegram
+        if: always()
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: ${{ job.status }}
+          job-name: Frontend test
 
   frontend-sonar:
     name: Frontend SonarQube
@@ -165,7 +180,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: ./frontend
-=======
+
       - name: Notify Telegram
         if: always()
         uses: ./.github/actions/telegram-notify
@@ -173,8 +188,7 @@ jobs:
           bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           status: ${{ job.status }}
-          job-name: Frontend test
->>>>>>> Stashed changes
+          job-name: Frontend SonarQube
 
   frontend-build:
     name: Frontend build
