@@ -60,7 +60,7 @@ terraform plan
 terraform apply
 ```
 
-Terraform создаст VPC, Managed Kubernetes кластер `itmovito-mk8s`, node group и правила firewall (в том числе доступ к frontend на порту `30080`).
+Terraform создаст VPC, Managed Kubernetes кластер `itmovito-mk8s`, node group и правила firewall.
 
 Чтобы удалить инфраструктуру:
 
@@ -111,11 +111,7 @@ docker push registry.mwsapis.ru/itmovito/itmovito-registry/frontend:latest
 Перед деплоем проверьте `k8s/backend-env.yaml` — в `CORS_ORIGINS` должен быть URL, с которого открываете frontend.
 
 ```bash
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/postgres.yaml
-kubectl apply -f k8s/backend-env.yaml
-kubectl apply -f k8s/backend.yaml
-kubectl apply -f k8s/frontend.yaml
+kubectl apply -k k8s
 ```
 
 Дождитесь готовности подов:
@@ -127,13 +123,14 @@ kubectl -n itmovito rollout status deployment/frontend
 kubectl -n itmovito get pods,svc
 ```
 
-Frontend доступен через Service типа `LoadBalancer` на порту `30080`:
+Frontend доступен через Service типа `LoadBalancer` на порту **80**:
 
 ```bash
 kubectl -n itmovito get svc frontend
-```
 
-Откройте `http://<EXTERNAL-IP>:30080`.
+# итоговый URL (ip или hostname LoadBalancer)
+echo "http://$(kubectl -n itmovito get svc frontend -o jsonpath='{.status.loadBalancer.ingress[0].ip}{.status.loadBalancer.ingress[0].hostname}')"
+```
 
 Backend при старте ждёт PostgreSQL, выполняет миграции Prisma и seed.
 
@@ -148,13 +145,20 @@ kubectl apply -k k8s/argocd
 kubectl -n argocd rollout status deployment/argocd-server
 ```
 
-**2. Доступ к UI.** `argocd-server` опубликован через `LoadBalancer` (`k8s/argocd/server-lb.yaml`), порт `30443` открыт в firewall (Terraform). Внешний IP:
+**2. Доступ к UI.** `argocd-server` опубликован через `LoadBalancer` (`k8s/argocd/server-lb.yaml`):
 
 ```bash
 kubectl -n argocd get svc argocd-server-lb
+
+# итоговый URL (обязательно https, без :30443)
+echo "https://$(kubectl -n argocd get svc argocd-server-lb -o jsonpath='{.status.loadBalancer.ingress[0].ip}{.status.loadBalancer.ingress[0].hostname}')"
 ```
 
-Открой `https://<EXTERNAL-IP>` (LB слушает `443`; через NodePort — `https://<IP-ноды>:30443`). Логин `admin`, пароль:
+Откройте напечатанный адрес, например `https://178.236.26.171`. Браузер покажет предупреждение о самоподписанном сертификате — это нормально, продолжите вручную (Advanced → Proceed).
+
+`:30443` в `PORT(S)` — это NodePort на нодах, **не** порт LoadBalancer. Через `EXTERNAL-IP` заходите только на **443**.
+
+Логин `admin`, пароль:
 
 ```bash
 kubectl -n argocd get secret argocd-initial-admin-secret \
@@ -164,7 +168,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 **3. Подключить приложение.** Один раз применяешь Application — ArgoCD начнёт следить за `k8s/` в GitHub:
 
 ```bash
-kubectl apply -f k8s/argocd/itmovito.yaml
+kubectl apply -f k8s/argocd/apps/itmovito.yaml
 ```
 
 После `git push` в `master` изменения в `k8s/` автоматически попадут в кластер (`prune` + `selfHeal` включены).
