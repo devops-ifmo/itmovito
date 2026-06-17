@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: registry.mwsapis.ru/itmovito/itmovito-registry/backend:eec8ca23455d30574aa5ac2f521cd40187732e9b
+          image: registry.mwsapis.ru/itmovito/itmovito-registry/backend:4f77029824f30029c5b130abbcd581377b39280e
           imagePullPolicy: Always
           command:
             - sh
