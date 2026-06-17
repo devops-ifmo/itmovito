@@ -9,11 +9,7 @@ inputs:
     description: Telegram chat id to send the message to.
     required: true
   status:
-<<<<<<< HEAD
-    description: "Job status — pass the job.status context (success | failure | cancelled)."
-=======
     description: Job status (success | failure | cancelled). Pass from the calling workflow.
->>>>>>> master
     required: true
   job-name:
     description: Human-readable name of the job/stage.
@@ -52,10 +48,9 @@ runs:
         TEXT="$(printf '%s <b>%s</b> — %s\n<code>%s</code> @ <code>%s</code> (%s)\n<a href="%s">View run</a>' \
           "${ICON}" "${JOB_NAME}" "${STATUS}" "${REPO}" "${REF}" "${SHORT_SHA}" "${RUN_URL}")"
 
-        # CHAT_ID may hold several ids separated by commas — send to each.
         IFS=',' read -ra CHAT_IDS <<< "${CHAT_ID}"
         for id in "${CHAT_IDS[@]}"; do
-          id="$(echo "${id}" | xargs)"  # trim whitespace
+          id="$(echo "${id}" | xargs)"
           [ -z "${id}" ] && continue
           curl -sS --fail-with-body \
             "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
