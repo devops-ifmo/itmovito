@@ -6,5 +6,6 @@ namespace: monitoring
 resources:
   - namespace.yaml
   - grafana-lb.yaml
+  - kube-state-metrics-servicemonitor.yaml
   - backend-servicemonitor.yaml
   - dashboard.yaml

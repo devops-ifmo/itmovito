@@ -1,0 +1,20 @@
+# kube-prometheus-stack ServiceMonitor expects app.kubernetes.io/instance=kps,
+# but after ArgoCD deploy labels may be monitoring-kps — Prometheus won't scrape replicas without this.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kube-state-metrics
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  namespaceSelector:
+    matchNames: [monitoring]
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: monitoring-kps
+      app.kubernetes.io/name: kube-state-metrics
+  endpoints:
+    - port: http
+      honorLabels: true
+      interval: 30s
