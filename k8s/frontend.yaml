@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: registry.mwsapis.ru/itmovito/itmovito-registry/frontend:af2888674adce73fa097be2dc7099615ac295a29
+          image: registry.mwsapis.ru/itmovito/itmovito-registry/frontend:de6345d628d8dcf2b69b3f81863c0a05d50e7b48
           imagePullPolicy: Always
           ports:
             - containerPort: 80
