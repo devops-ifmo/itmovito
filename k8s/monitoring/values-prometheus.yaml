@@ -14,7 +14,7 @@ grafana:
   adminPassword: itmovito
   defaultDashboardsEnabled: true
   service:
-    type: LoadBalancer
+    type: ClusterIP
     port: 80
   sidecar:
     dashboards:

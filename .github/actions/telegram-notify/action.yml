@@ -9,7 +9,11 @@ inputs:
     description: Telegram chat id to send the message to.
     required: true
   status:
+<<<<<<< HEAD
     description: "Job status — pass the job.status context (success | failure | cancelled)."
+=======
+    description: Job status (success | failure | cancelled). Pass from the calling workflow.
+>>>>>>> master
     required: true
   job-name:
     description: Human-readable name of the job/stage.
