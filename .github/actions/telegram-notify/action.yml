@@ -52,10 +52,16 @@ runs:
         TEXT="$(printf '%s <b>%s</b> — %s\n<code>%s</code> @ <code>%s</code> (%s)\n<a href="%s">View run</a>' \
           "${ICON}" "${JOB_NAME}" "${STATUS}" "${REPO}" "${REF}" "${SHORT_SHA}" "${RUN_URL}")"
 
-        curl -sS --fail-with-body \
-          "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-          --data-urlencode "chat_id=${CHAT_ID}" \
-          --data-urlencode "text=${TEXT}" \
-          --data-urlencode "parse_mode=HTML" \
-          --data-urlencode "disable_web_page_preview=true" \
-          -o /dev/null
+        # CHAT_ID may hold several ids separated by commas — send to each.
+        IFS=',' read -ra CHAT_IDS <<< "${CHAT_ID}"
+        for id in "${CHAT_IDS[@]}"; do
+          id="$(echo "${id}" | xargs)"  # trim whitespace
+          [ -z "${id}" ] && continue
+          curl -sS --fail-with-body \
+            "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${id}" \
+            --data-urlencode "text=${TEXT}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode "disable_web_page_preview=true" \
+            -o /dev/null
+        done
